@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,26 +23,24 @@ import {
   BookOpen,
   Users,
   Bell,
-  MessageSquare,
-  Settings,
   Book,
-  User,
-  CalendarCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
+  headerActions?: React.ReactNode;  // NEW optional prop for extra header buttons or UI
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   children,
   title,
+  headerActions,
 }) => {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
-  
+
   const isAdmin = useRoleCheck(["Admin"]);
   const isFaculty = useRoleCheck(["Faculty", "Admin"]);
   const isCanteenStaff = useRoleCheck(["Canteen Staff", "Admin"]);
@@ -60,6 +57,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <h1 className="text-xl font-semibold">{title}</h1>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Inject additional header actions if provided */}
+              {headerActions}
               <Badge variant="outline" className="dark:bg-gray-700">
                 {profile?.role || "Loading..."}
               </Badge>
@@ -84,21 +83,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 };
 
 function AppSidebar() {
-  const { profile } = useAuth();
   const navigate = useNavigate();
-  
-  const isAdmin = useRoleCheck(["Admin"]);
-  const isFaculty = useRoleCheck(["Faculty", "Admin"]);
-  const isCanteenStaff = useRoleCheck(["Canteen Staff", "Admin"]);
-  const isCR = useRoleCheck(["CR", "Admin"]);
+  const { profile } = useAuth();
 
   return (
     <Sidebar className="shadow-lg border-r dark:bg-gray-800 dark:border-gray-700">
-      <SidebarHeader className="flex items-center justify-center py-6">
-        <img src="/amrita-logo.png" alt="Amrita Logo" className="h-10" />
-      </SidebarHeader>
-      
       <SidebarContent>
+        {/* Video background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+        >
+          <source src="/sidebar.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         <SidebarGroup>
           <SidebarGroupLabel>General</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -109,28 +110,28 @@ function AppSidebar() {
                   <span>Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => navigate("/dashboard/classrooms")}>
                   <BookOpen className="h-5 w-5" />
                   <span>Classrooms</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => navigate("/dashboard/faculty")}>
                   <Users className="h-5 w-5" />
                   <span>Faculty</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => navigate("/dashboard/canteen")}>
                   <Book className="h-5 w-5" />
                   <span>Canteen</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => navigate("/dashboard/announcements")}>
                   <Bell className="h-5 w-5" />
@@ -140,73 +141,7 @@ function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        
-        {(isAdmin || isFaculty || isCR || isCanteenStaff) && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Management</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {(isAdmin || isFaculty || isCR) && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={() => navigate("/dashboard/classroom-management")}>
-                      <BookOpen className="h-5 w-5" />
-                      <span>Manage Classrooms</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-                
-                {(isAdmin || isFaculty) && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={() => navigate("/dashboard/availability")}>
-                      <CalendarCheck className="h-5 w-5" />
-                      <span>Faculty Availability</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-                
-                {(isAdmin || isCanteenStaff) && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={() => navigate("/dashboard/menu-management")}>
-                      <Book className="h-5 w-5" />
-                      <span>Menu Management</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-                
-                {isAdmin && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={() => navigate("/dashboard/users")}>
-                      <Users className="h-5 w-5" />
-                      <span>User Management</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-                
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => navigate("/dashboard/feedback")}>
-                    <MessageSquare className="h-5 w-5" />
-                    <span>Feedback</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
-      
-      <SidebarFooter className="p-4 border-t dark:border-gray-700">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
-            {profile?.name?.charAt(0) || "U"}
-          </div>
-          <div className="text-sm">
-            <div className="font-medium truncate">{profile?.name || "User"}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {profile?.email || ""}
-            </div>
-          </div>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }

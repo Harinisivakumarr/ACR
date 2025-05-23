@@ -1,0 +1,51 @@
+/* Adjustments for react-big-calendar to fit your theme */
+.rbc-calendar {
+  font-family: inherit; /* Inherit font from your app */
+}
+
+.rbc-header {
+  font-weight: 600;
+  padding: 0.5rem 0;
+}
+
+.rbc-today {
+  background-color: var(--primary-100); /* Use a light primary color for today's background */
+}
+
+.rbc-event {
+  background-color: var(--primary); /* Use your primary color for events */
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 2px 5px;
+  font-size: 0.875rem; /* text-sm */
+}
+
+/* Dark mode adjustments (if needed, this is just an example) */
+.dark .rbc-calendar {
+  background-color: #1a202c; /* Darker background */
+  color: #cbd5e0; /* Lighter text */
+}
+
+.dark .rbc-header {
+  color: #e2e8f0;
+}
+
+.dark .rbc-toolbar button {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+.dark .rbc-toolbar button:hover {
+  background-color: #4a5568;
+}
+
+.dark .rbc-now {
+  background-color: #3b82f6; /* Keep primary color for now indicator */
+}
+
+.dark .rbc-event {
+  background-color: var(--primary);
+  color: white;
+}

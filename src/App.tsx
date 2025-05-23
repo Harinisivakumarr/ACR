@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,7 +14,8 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Classrooms from "./pages/dashboard/Classrooms";
 import Faculty from "./pages/dashboard/Faculty";
 import Canteen from "./pages/dashboard/Canteen";
-import Announcements from "./pages/dashboard/Announcements";
+import Announcements from "./pages/dashboard/announcements";
+import CreateAnnouncement from './pages/dashboard/create-announcement';
 
 import { PrivateRoute } from "@/components/auth/PrivateRoute";
 import { UserRole } from "./lib/supabase";
@@ -86,7 +86,15 @@ const App = () => (
                   </PrivateRoute>
                 }
               />
-              
+              <Route
+                path="/dashboard/create-announcement"
+                element={
+                  <PrivateRoute>
+                    <CreateAnnouncement />
+                  </PrivateRoute>
+                }
+              />
+
               {/* Fallback 404 page */}
               <Route path="*" element={<NotFound />} />
             </Routes>

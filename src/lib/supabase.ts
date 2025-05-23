@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://dwduaysywemwapfazfwe.supabase.co';
@@ -20,28 +19,32 @@ export const isAuthenticated = async () => {
   const { data, error } = await supabase.auth.getSession();
   return { session: data.session, error };
 };
+// ✅ Check if an email is preapproved
+export const isPreapprovedUser = async (email: string) => {
+  const { data, error } = await supabase
+    .from('preapproved_users')
+    .select('*')
+    .eq('email', email)
+    .single();
+    return { isAllowed: !!data, data, error };
+};
 
-// Helper function to get current user with profile data
+// ✅ Get current user and profile from preapproved_users
 export const getCurrentUser = async () => {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (authError || !user) {
+
+  if (authError || !user || !user.email) {
     return { user: null, profile: null, error: authError };
   }
 
   const { data: profile, error: profileError } = await supabase
-    .from('users')
+    .from('preapproved_users')
     .select('*')
     .eq('email', user.email)
     .single();
 
-  return { 
-    user, 
-    profile, 
-    error: profileError 
-  };
+  return { user, profile, error: profileError };
 };
-
 // Helper to check user role
 export const checkUserRole = (role: UserRole | null, allowedRoles: UserRole[]) => {
   if (!role) return false;

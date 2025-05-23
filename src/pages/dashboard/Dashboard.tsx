@@ -1,14 +1,16 @@
-
+// src/pages/dashboard/Dashboard.tsx
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'; // KEEP THIS ONE
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Bell, Book, Calendar } from 'lucide-react';
+import { BookOpen, Users, Bell, Book } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import TodayScheduleCard from '@/pages/dashboard/TodayScheduleCard'; // Or '@/components/dashboard/TodayScheduleCard' if you moved it
+import { CalendarIcon } from 'lucide-react'; // Make sure CalendarIcon is also imported if you are using it in Dashboard.tsx
 
 const Dashboard: React.FC = () => {
   const { profile } = useAuth();
@@ -30,38 +32,38 @@ const Dashboard: React.FC = () => {
           .from('classrooms')
           .select('*')
           .eq('status', 'Available');
-          
+
         // Fetch faculty stats
         const { data: faculty } = await supabase
           .from('faculty_availability')
           .select('*')
           .eq('status', 'AVAILABLE');
-        
+
         // Fetch announcements stats
         const { data: announcements } = await supabase
           .from('announcements')
           .select('*')
           .order('created_at', { ascending: false })
           .limit(5);
-          
+
         // Calculate today's announcements
         const today = new Date().toISOString().split('T')[0];
         const todayAnnouncements = announcements?.filter(
           announcement => announcement.created_at.startsWith(today)
         ).length || 0;
-        
+
         // Fetch canteen items
         const { data: canteenItems } = await supabase
           .from('canteen_menu')
           .select('*');
-          
+
         setStats({
           classroomsAvailable: classrooms?.length || 0,
           facultyAvailable: faculty?.length || 0,
           todayAnnouncements: todayAnnouncements,
           canteenItems: canteenItems?.length || 0,
         });
-        
+
         setAnnouncements(announcements || []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -69,26 +71,26 @@ const Dashboard: React.FC = () => {
         setLoading(false);
       }
     };
-    
+
     fetchDashboardData();
-    
+
     // Set up realtime subscription for announcements
     const subscription = supabase
       .channel('public:announcements')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'announcements' 
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'announcements'
       }, () => {
         fetchDashboardData();
       })
       .subscribe();
-      
+
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-  
+
   return (
     <DashboardLayout title="Dashboard">
       <div className="grid gap-6">
@@ -100,36 +102,36 @@ const Dashboard: React.FC = () => {
             Here's what's happening at Amrita Vishwa Vidyapeetham today
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard 
+          <StatsCard
             title="Available Classrooms"
             value={loading ? null : stats.classroomsAvailable}
             icon={<BookOpen />}
             href="/dashboard/classrooms"
           />
-          <StatsCard 
+          <StatsCard
             title="Available Faculty"
             value={loading ? null : stats.facultyAvailable}
             icon={<Users />}
             href="/dashboard/faculty"
           />
-          <StatsCard 
+          <StatsCard
             title="Today's Announcements"
             value={loading ? null : stats.todayAnnouncements}
             icon={<Bell />}
             href="/dashboard/announcements"
           />
-          <StatsCard 
+          <StatsCard
             title="Canteen Items"
             value={loading ? null : stats.canteenItems}
             icon={<Book />}
             href="/dashboard/canteen"
           />
         </div>
-        
+
         <Separator className="my-2" />
-        
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -174,38 +176,10 @@ const Dashboard: React.FC = () => {
             )}
           </CardContent>
         </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="mr-2 h-5 w-5" /> Today's Schedule
-            </CardTitle>
-            <CardDescription>
-              Overview of campus activities for today
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex flex-col space-y-2">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-3/4" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
-                  Calendar features coming soon
-                </p>
-                <Link to="/dashboard/classrooms" className="text-primary underline">
-                  View classroom availability
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+
+        {/* Replace the old Calendar Card with the new component */}
+        <TodayScheduleCard />
+
       </div>
     </DashboardLayout>
   );

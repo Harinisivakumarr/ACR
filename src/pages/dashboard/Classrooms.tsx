@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +7,8 @@ import { supabase, ClassroomStatus } from '@/lib/supabase';
 import { useAuth, useRoleCheck } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,9 +36,11 @@ const Classrooms: React.FC = () => {
   const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<ClassroomStatus | null>(null);
-  
+  const [statusFilter, setStatusFilter] = useState<ClassroomStatus | 'All'>('All');
+  const [searchTerm, setSearchTerm] = useState('');
+
   const { profile } = useAuth();
-  const canEditClassroom = useRoleCheck(['Admin', 'Faculty', 'CR']);
+  const canEditClassroom = useRoleCheck(['admin', 'faculty', 'cr']);
 
   useEffect(() => {
     const fetchClassrooms = async () => {
@@ -48,11 +51,9 @@ const Classrooms: React.FC = () => {
           .order('building')
           .order('floor')
           .order('name');
-          
-        if (error) {
-          throw error;
-        }
-        
+
+        if (error) throw error;
+
         setClassrooms(data as Classroom[]);
       } catch (error) {
         console.error('Error fetching classrooms:', error);
@@ -65,27 +66,20 @@ const Classrooms: React.FC = () => {
         setLoading(false);
       }
     };
-    
+
     fetchClassrooms();
-    
-    // Set up realtime subscription
+
     const subscription = supabase
       .channel('public:classrooms')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'classrooms' 
-      }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'classrooms' }, (payload) => {
         if (payload.eventType === 'UPDATE') {
-          setClassrooms(currentClassrooms => 
-            currentClassrooms.map(classroom => 
-              classroom.id === payload.new.id ? payload.new as Classroom : classroom
-            )
+          setClassrooms(current =>
+            current.map(c => (c.id === payload.new.id ? payload.new as Classroom : c))
           );
         }
       })
       .subscribe();
-      
+
     return () => {
       subscription.unsubscribe();
     };
@@ -93,7 +87,7 @@ const Classrooms: React.FC = () => {
 
   const handleUpdateStatus = async () => {
     if (!selectedClassroom || !newStatus || !profile) return;
-    
+
     try {
       const { error } = await supabase
         .from('classrooms')
@@ -103,11 +97,9 @@ const Classrooms: React.FC = () => {
           updated_by: profile.name,
         })
         .eq('id', selectedClassroom.id);
-        
-      if (error) {
-        throw error;
-      }
-      
+
+      if (error) throw error;
+
       toast({
         title: 'Status Updated',
         description: `${selectedClassroom.name} is now ${newStatus}`,
@@ -132,22 +124,49 @@ const Classrooms: React.FC = () => {
     setIsDialogOpen(true);
   };
 
+  // Filter classrooms by status and search term (case-insensitive)
+  const filteredClassrooms = classrooms.filter(c => {
+    const matchesStatus = statusFilter === 'All' || c.status === statusFilter;
+    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
   return (
     <DashboardLayout title="Classroom Availability">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-semibold mb-2">
-            Classroom Status
-          </h2>
-          <p className="text-muted-foreground">
-            View and manage classroom availability across campus
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Header + Controls */}
+        <section>
+          {/* Search Bar styled like Faculty's */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+            <Input
+              type="text"
+              placeholder="Search classrooms..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <div className="flex gap-2 mt-4 flex-wrap">
+            {['All', 'Available', 'Occupied', 'Maintenance'].map(status => (
+              <Button
+                key={status}
+                variant={statusFilter === status ? 'default' : 'outline'}
+                onClick={() => setStatusFilter(status as ClassroomStatus | 'All')}
+                size="sm"
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
+        </section>
+
+        {/* Classroom Cards */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading ? (
-            Array.from({ length: 6 }).map((_, index) => (
-              <Card key={index}>
+            Array.from({ length: 6 }).map((_, idx) => (
+              <Card key={idx}>
                 <CardHeader className="pb-2">
                   <Skeleton className="h-5 w-3/4" />
                 </CardHeader>
@@ -161,7 +180,7 @@ const Classrooms: React.FC = () => {
               </Card>
             ))
           ) : (
-            classrooms.map((classroom) => (
+            filteredClassrooms.map(classroom => (
               <Card key={classroom.id}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">{classroom.name}</CardTitle>
@@ -171,57 +190,39 @@ const Classrooms: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div>
-                      <Badge
-                        className={`
-                          ${classroom.status === 'Available' ? 'status-available' : ''}
-                          ${classroom.status === 'Occupied' ? 'status-occupied' : ''}
-                          ${classroom.status === 'Maintenance' ? 'status-maintenance' : ''}
-                        `}
-                      >
-                        {classroom.status}
-                      </Badge>
-                      
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Last updated: {new Date(classroom.last_updated).toLocaleString()}
-                        {classroom.updated_by && ` by ${classroom.updated_by}`}
-                      </p>
-                    </div>
-                    
+                    <Badge
+                      className={
+                        classroom.status === 'Available'
+                          ? 'bg-green-100 text-green-700'
+                          : classroom.status === 'Occupied'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }
+                    >
+                      {classroom.status}
+                    </Badge>
+
                     {canEditClassroom && (
                       <div className="flex flex-wrap gap-2">
-                        {classroom.status !== 'Available' && (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-green-600"
-                            onClick={() => openUpdateDialog(classroom, 'Available')}
-                          >
-                            Set Available
-                          </Button>
-                        )}
-                        
-                        {classroom.status !== 'Occupied' && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="text-red-600"
-                            onClick={() => openUpdateDialog(classroom, 'Occupied')}
-                          >
-                            Set Occupied
-                          </Button>
-                        )}
-                        
-                        {classroom.status !== 'Maintenance' && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="text-yellow-600"
-                            onClick={() => openUpdateDialog(classroom, 'Maintenance')}
-                          >
-                            Set Maintenance
-                          </Button>
-                        )}
+                        {['Available', 'Occupied', 'Maintenance']
+                          .filter(status => status !== classroom.status)
+                          .map(status => (
+                            <Button
+                              key={status}
+                              size="sm"
+                              variant="outline"
+                              className={
+                                status === 'Available'
+                                  ? 'text-green-600'
+                                  : status === 'Occupied'
+                                  ? 'text-red-600'
+                                  : 'text-yellow-600'
+                              }
+                              onClick={() => openUpdateDialog(classroom, status as ClassroomStatus)}
+                            >
+                              Set {status}
+                            </Button>
+                          ))}
                       </div>
                     )}
                   </div>
@@ -229,15 +230,17 @@ const Classrooms: React.FC = () => {
               </Card>
             ))
           )}
-        </div>
+        </section>
       </div>
-      
+
+      {/* Confirmation Dialog */}
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Update Classroom Status</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to change {selectedClassroom?.name} to {newStatus}?
+              Are you sure you want to change <strong>{selectedClassroom?.name}</strong> to{' '}
+              <strong>{newStatus}</strong>?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
