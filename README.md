@@ -1,73 +1,51 @@
-# Welcome to your Lovable project
+#  Amrita Campus Radar (ACR)
 
-## Project info
+Welcome to **Amrita Campus Radar (ACR)** – your one-stop smart campus companion! 
 
-**URL**: https://lovable.dev/projects/313b98d2-e730-4ec5-a6a3-71b8e3ae0656
+This app is built to simplify life at **Amrita University** by giving students and staff real-time access to key campus services like classroom bookings, canteen menus, announcements, and more — all in one place.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+##  Features
 
-**Use Lovable**
+Here's what ACR brings to campus life:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/313b98d2-e730-4ec5-a6a3-71b8e3ae0656) and start prompting.
+-  **Classroom Booking**  
+  Check room availability and book classrooms based on your role.
 
-Changes made via Lovable will be committed automatically to this repo.
+-  **Canteen Menu + Voting**  
+  See what's cooking today, vote for your favorite meals, and help improve the menu.
 
-**Use your preferred IDE**
+-  **Live Announcements**  
+  Stay in the loop with important notices and campus news.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+-  **Feedback System**  
+  Submit feedback or suggestions to help improve the campus experience.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+-  **Role-Based Access Control (RBAC)**  
+  Smart access control for Admins, Faculty, Class Reps, Students, and Canteen Staff.
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+##  Tech Stack
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Built with modern tools to ensure speed, scalability, and simplicity:
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **Frontend**: React (Next.js or React Router), TailwindCSS, ShadCN UI
+- **Backend**: [Supabase](https://supabase.com/)
+  - PostgreSQL
+  - Auth
+  - Realtime
+  - Row-Level Security (RLS)
+  - Storage
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+##  Getting Started
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+To run this project locally:
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/313b98d2-e730-4ec5-a6a3-71b8e3ae0656) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/yourusername/amrita-campus-radar.git
+   cd amrita-campus-radar
