@@ -14,7 +14,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Classrooms from "./pages/dashboard/Classrooms";
 import Faculty from "./pages/dashboard/Faculty";
 import Canteen from "./pages/dashboard/Canteen";
-import Announcements from "./pages/dashboard/announcements";
+import Announcements from "./pages/dashboard/Announcements";
 import CreateAnnouncement from './pages/dashboard/create-announcement';
 import Timetable from "./pages/dashboard/Timetable";
 import Feedback from "./pages/dashboard/Feedback";
